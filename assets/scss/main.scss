@@ -1,0 +1,42 @@
+@use "variables" as *;
+
+// Reset and base styles
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: $background-color;
+    color: $text-color;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: $standard-transition;
+
+    &:hover {
+        color: $primary-color;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+// Utilities
+.text-primary {
+    color: $primary-color;
+}
+
+.bg-primary {
+    background-color: $primary-color;
+}
