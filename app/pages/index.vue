@@ -1,331 +1,339 @@
 <template>
   <div class="home-page">
-    <!-- Hero Section avec TOUS les festivals depuis WordPress -->
-    <section class="hero-section">
+    <!-- Hero Carousel Section -->
+    <HeroCarousel />
+
+    <!-- Bento Festivals Section -->
+    <section class="bento-section">
       <div class="container">
-        <div class="hero-content">
-          <!-- Badge Agenda -->
-          <div class="hero-badge animate-fadeIn">
-            <span class="icon">📅</span>
-            <span class="text">AGENDA 2025 - 2026</span>
-          </div>
+        <div class="section-header" v-motion-fade-visible>
+          <div class="header-badge">NOS UNIVERS</div>
+          <h2 class="section-title">EXPLOREZ LE <br/><span>HUB OTAKU</span></h2>
+          <p class="section-desc">Plongez dans les plus grands rassemblements otaku de France.</p>
+        </div>
 
-          <!-- Loading State -->
-          <div v-if="pending" class="loading-state">
-            <div class="loading-spinner"></div>
-            <p>Chargement des festivals...</p>
-          </div>
+        <div v-if="pending" class="bento-grid loading">
+          <div v-for="n in 3" :key="n" class="bento-item skeleton glass"></div>
+        </div>
 
-          <!-- Error State -->
-          <div v-else-if="error" class="error-state">
-            <span class="icon">⚠️</span>
-            <p>Erreur de chargement</p>
-            <button @click="() => refresh()" class="retry-btn">Réessayer</button>
-          </div>
+        <div v-else-if="error" class="error-state">
+          <Icon name="lucide:wifi-off" size="48" />
+          <p>La connexion au Hub a échoué.</p>
+          <button @click="refresh" class="btn btn--primary">REDÉMARRER</button>
+        </div>
 
-          <!-- Festivals Grid - DYNAMIQUE depuis WordPress -->
-          <div v-else class="festivals-grid">
-            <article 
-              v-for="(festival, index) in festivals" 
-              :key="festival.id"
-              class="festival-card"
-              :style="{ 
-                '--festival-color': festival.color,
-                animationDelay: `${index * 0.12}s` 
-              }"
-            >
-              <NuxtLink :to="festival.path" class="festival-card__link">
-                <div class="festival-card__logo">
-                  <NuxtImg 
-                    v-if="festival.logo"
-                    :src="festival.logo"
-                    :alt="festival.name"
-                    width="400"
-                    height="400"
-                    format="webp"
-                    quality="85"
-                    loading="lazy"
-                  />
-                  <div v-else class="festival-card__logo-placeholder">
-                    {{ getInitials(festival.name) }}
-                  </div>
-                </div>
-              </NuxtLink>
-
-              <div class="festival-card__actions">
-                <h2 class="festival-card__title">{{ festival.name.toUpperCase() }}</h2>
-                
-                <div class="btn-group">
-                  <NuxtLink 
-                    :to="`${festival.path}exposant/`" 
-                    class="btn btn--cyan"
-                  >
-                    Entrée exposant
-                  </NuxtLink>
-                  <NuxtLink 
-                    :to="`${festival.path}visiteur/`" 
-                    class="btn btn--cyan"
-                  >
-                    Entrée visiteur
-                  </NuxtLink>
-                </div>
-
-                <!-- Nombre de villes -->
-                <p class="festival-card__count" v-if="festival.events.length > 0">
-                  {{ festival.events.length }} ville(s) programmée(s)
-                </p>
-
-                <NuxtLink :to="festival.path" class="festival-card__more">
-                  Voir toutes les dates →
+        <div v-else class="bento-grid">
+          <article 
+            v-for="(festival, index) in festivals" 
+            :key="festival.id"
+            class="bento-item"
+            :class="`bento-item--${index % 3}`"
+            v-motion
+            :initial="{ opacity: 0, scale: 0.95, y: 30 }"
+            :visible="{ opacity: 1, scale: 1, y: 0, transition: { delay: index * 100, duration: 800 } }"
+            :style="{ '--accent': festival.color }"
+          >
+            <div class="bento-item__background">
+              <NuxtImg 
+                v-if="festival.logo"
+                :src="festival.logo"
+                :alt="festival.name"
+                width="800"
+                height="800"
+                format="webp"
+                quality="85"
+              />
+            </div>
+            
+            <div class="bento-item__overlay"></div>
+            
+            <div class="bento-item__content">
+              <div class="bento-item__tag">
+                <Icon name="lucide:map-pin" size="14" />
+                {{ festival.events.length }} DESTINATIONS
+              </div>
+              <h3 class="bento-item__title">{{ festival.name }}</h3>
+              
+              <div class="bento-item__actions">
+                <NuxtLink :to="festival.path" class="bento-btn">
+                  DÉCOUVRIR <Icon name="lucide:chevron-right" />
                 </NuxtLink>
               </div>
-            </article>
-          </div>
+            </div>
+          </article>
         </div>
       </div>
-
-      <!-- Cherry Blossoms Animation -->
-      <div class="cherry-blossoms" aria-hidden="true">
-        <span v-for="n in 15" :key="n" class="petal" :style="getPetalStyle(n)">🌸</span>
-      </div>
     </section>
+
+    <!-- Visual Divider -->
+    <div class="industrial-line" aria-hidden="true">
+      <div class="line"></div>
+      <div class="dot"></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- Impact Jumbotron -->
+    <ImpactJumbotron />
+
+    <!-- Cherry Blossoms (Enhanced) -->
+    <div class="cherry-blossoms">
+      <span v-for="n in 20" :key="n" class="petal" :style="getPetalStyle(n)">🌸</span>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useFestivalsSSR } from '~/modules/festivals';
 
-// SEO Meta
+// SEO Optimization
 useSeoMeta({
-  title: 'Japan Conventions - Accueil | Conventions Manga, Anime et Jeux Vidéo en France',
-  description: 'Découvrez toutes nos conventions : Japan Otaku Festival, Japan Manga Wave, Gamer Connection, Ink Secret et plus. Événements de culture japonaise en France.',
-  ogTitle: 'Japan Conventions - Culture Japonaise en France',
-  ogDescription: 'Vos événements préférés de culture japonaise arrivent près de chez vous !',
-  ogImage: 'https://japanconventions.com/wp-content/uploads/2025/08/Japan-Otaku-festival-Logo-1536x1536-1-3.png',
-  twitterCard: 'summary_large_image'
+  title: 'Japan Conventions 2025 | L\'Éxpérience Culturelle Nippone Ultimé',
+  description: 'Découvrez les plus grandes conventions Japan & Manga en France. Japan Otaku Festival, Japan Manga Wave et Gamer Connection. Réservez vos billets pour 2025.',
+  ogTitle: 'Japan Conventions 2025 | L\'Éxpérience Culturelle Nippone Ultimé',
+  ogDescription: 'Le plus grand réseau de conventions Otaku en France. Cosplay, Expo, Gaming et Culture Nippone.',
+  ogImage: '/images/og-main.jpg',
+  ogType: 'website',
+  ogLocale: 'fr_FR',
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'Japan Conventions 2025',
+  twitterDescription: 'Plongez dans l\'univers Otaku en France.',
 });
 
-// Fetch ALL festivals from WordPress menu
+// JSON-LD for Search Engines
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Japan Conventions",
+        "url": "https://japanconventions.fr",
+        "logo": "https://japanconventions.fr/logo.png",
+        "sameAs": [
+          "https://facebook.com/japanconventions",
+          "https://instagram.com/japanconventions"
+        ],
+        "description": "Organisateur d'événements culturels japonais et geek en France."
+      })
+    }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://japanconventions.fr' }
+  ]
+});
+
 const { data: festivals, pending, error, refresh } = await useFestivalsSSR();
 
-// Get initials for festivals without logo
-const getInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 3);
+// Petal styles
+const getPetalStyle = (n: number) => {
+  const left = Math.random() * 100;
+  const duration = 10 + Math.random() * 20;
+  const delay = Math.random() * 10;
+  const size = 10 + Math.random() * 20;
+  const opacity = 0.1 + Math.random() * 0.3;
+
+  return {
+    left: `${left}%`,
+    animationDuration: `${duration}s`,
+    animationDelay: `${delay}s`,
+    fontSize: `${size}px`,
+    opacity: opacity,
+  };
 };
 
-// Helper: Random petal style for animation
-const getPetalStyle = (index: number) => ({
-  left: `${(index * 7) % 100}%`,
-  animationDelay: `${(index * 0.4) % 6}s`,
-  animationDuration: `${10 + (index % 5)}s`,
-  fontSize: `${1.2 + (index % 3) * 0.3}rem`,
-  opacity: 0.4 + (index % 4) * 0.1
-});
+const getInitials = (name: string): string => {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 3);
+};
 </script>
 
 <style lang="scss" scoped>
-// Hero Section
-.hero-section {
-  background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
-  padding: 3rem 0 4rem;
-  position: relative;
-  overflow: hidden;
-  min-height: 80vh;
+.section-header {
+  margin-bottom: 5rem;
+  text-align: center;
 }
 
-.hero-content {
-  position: relative;
-  z-index: 2;
+.header-badge {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  background: rgba(230, 0, 18, 0.1);
+  border: 1px solid rgba(230, 0, 18, 0.2);
+  color: $primary-color;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: white;
-  padding: 0.875rem 1.75rem;
-  border-radius: 50px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 3rem;
+.section-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin-bottom: 1.5rem;
+  color: white;
+  line-height: 1.1;
 
-  .icon {
-    font-size: 1.5rem;
-  }
-
-  .text {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: $primary-color;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+  span {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
   }
 }
 
-// Animations
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-out forwards;
+.section-desc {
+  opacity: 0.6;
+  font-size: 1.1rem;
+  color: white;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-// Festivals Grid
-.festivals-grid {
+.bento-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: 250px;
+  gap: 1.5rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: $tablet) {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-auto-rows: 400px;
   }
 }
 
-// Festival Card
-.festival-card {
-  background: white;
-  border-radius: 16px;
+.bento-item {
+  position: relative;
+  background: $bg-dark;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  animation: slideUp 0.6s ease-out forwards;
-  opacity: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--0 { grid-column: span 8; grid-row: span 2; }
+  &--1 { grid-column: span 4; grid-row: span 1; }
+  &--2 { grid-column: span 4; grid-row: span 1; }
+
+  @media (max-width: $tablet) {
+    grid-column: span 12 !important;
+    grid-row: span 1 !important;
+  }
 
   &:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-  }
-
-  &__link {
-    display: block;
-  }
-
-  &__logo {
-    padding: 2rem;
-    background: #fdfdfd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 260px;
-    transition: background 0.3s ease;
-
-    img {
-      max-width: 100%;
-      max-height: 200px;
-      object-fit: contain;
-      transition: transform 0.4s ease;
-    }
-  }
-
-  &__logo-placeholder {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: var(--festival-color, $primary-color);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-  }
-
-  &:hover &__logo {
-    background: #f8f8f8;
+    transform: scale(0.98);
+    border-color: var(--accent);
     
-    img {
-      transform: scale(1.05);
+    .bento-item__background img {
+      transform: scale(1.1);
+      filter: saturate(1.2);
     }
   }
 
-  &__actions {
-    background: var(--festival-color, $primary-color);
-    padding: 1.75rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+  &__background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.4;
+      transition: all 0.8s ease;
+    }
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%);
+    z-index: 1;
+  }
+
+  &__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2.5rem;
+    z-index: 2;
+  }
+
+  &__tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    color: var(--accent);
+    margin-bottom: 1rem;
   }
 
   &__title {
+    font-size: 2rem;
     color: white;
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    margin: 0;
-  }
-
-  &__count {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.9rem;
-    margin: 0;
-  }
-
-  &__more {
-    color: white;
-    font-size: 0.85rem;
-    text-decoration: underline;
-    opacity: 0.85;
-    transition: opacity 0.3s ease;
-
-    &:hover {
-      opacity: 1;
-      color: white;
-    }
+    margin-bottom: 1.5rem;
   }
 }
 
-@keyframes slideUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
-
-// Button Group
-.btn-group {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn {
+.bento-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.875rem 1.5rem;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  gap: 0.75rem;
+  color: white;
   text-decoration: none;
-  border: none;
+  font-weight: 800;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: var(--accent);
+    gap: 1rem;
+  }
+}
+
+// Buttons
+.btn {
+  padding: 1rem 2.5rem;
+  border-radius: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
   cursor: pointer;
 
-  &--cyan {
-    background: #00a8e1;
+  &--neon {
+    background: white;
+    color: black;
+    border: none;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: $primary-color;
+      color: white;
+      box-shadow: 0 0 30px rgba(230, 0, 18, 0.4);
+      transform: translateY(-5px);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
 
     &:hover {
-      background: #0090c5;
-      color: white;
+      border-color: white;
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  &--primary {
+    background: $primary-color;
+    color: white;
+    border: none;
+
+    &:hover {
+      background: darken($primary-color, 5%);
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0, 168, 225, 0.4);
+      box-shadow: 0 8px 16px rgba(230, 0, 18, 0.2);
     }
   }
 }
@@ -334,93 +342,59 @@ const getPetalStyle = (index: number) => ({
 .loading-state,
 .error-state {
   text-align: center;
-  padding: 5rem 2rem;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  padding: 6rem 2rem;
+  border-radius: 32px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.loading-state {
-  .loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid #e9ecef;
-    border-top-color: $primary-color;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1.5rem;
-  }
-
-  p {
-    color: #666;
-    font-size: 1.1rem;
-  }
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(0,0,0,0.05);
+  border-top-color: $primary-color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
 }
 
-.error-state {
-  .icon {
-    font-size: 4rem;
-    display: block;
-    margin-bottom: 1rem;
-  }
+// Industrial Divider
+.industrial-line {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 4rem 0;
+  opacity: 0.1;
 
-  p {
-    color: #666;
-    margin-bottom: 1.5rem;
-  }
+  .line { flex: 1; height: 1px; background: white; }
+  .dot { width: 4px; height: 4px; background: white; border-radius: 50%; }
 }
 
-.retry-btn {
-  background: $primary-color;
-  color: white;
-  border: none;
-  padding: 0.875rem 2rem;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #c9000f;
-    transform: translateY(-2px);
-  }
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 // Cherry Blossoms Animation
 .cherry-blossoms {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: fixed;
+  inset: 0;
   pointer-events: none;
+  z-index: 5;
   overflow: hidden;
-}
 
-.petal {
-  position: absolute;
-  top: -60px;
-  animation: fall linear infinite;
+  .petal {
+    position: absolute;
+    top: -50px;
+    animation: fall linear forwards;
+    user-select: none;
+  }
 }
 
 @keyframes fall {
-  0% {
-    transform: translateY(-20px) rotate(0deg) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(50vh) rotate(180deg) translateX(50px);
-  }
-  90% {
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateY(110vh) rotate(360deg) translateX(-30px);
-    opacity: 0;
+  to {
+    transform: translateY(100vh) rotate(360deg);
   }
 }
 

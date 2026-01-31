@@ -2,12 +2,13 @@
   <header class="header" :class="{ 'is-scrolled': isScrolled }">
     <div class="container header__content">
       <NuxtLink to="/" class="header__logo">
+        <div class="logo-badge" v-motion-pop>JC</div>
         <span class="logo-text">JAPAN<span class="text-primary">CONVENTIONS</span></span>
       </NuxtLink>
 
       <nav class="header__nav" :class="{ 'is-open': isMobileMenuOpen }">
         <ul class="header__menu">
-          <li v-for="item in menuItems" :key="item.path">
+          <li v-for="(item, index) in menuItems" :key="item.path" v-motion-slide-visible-top :delay="index * 100">
             <NuxtLink :to="item.path" class="header__link" @click="isMobileMenuOpen = false">
               {{ item.label }}
             </NuxtLink>
@@ -16,13 +17,15 @@
       </nav>
 
       <div class="header__actions">
-        <NuxtLink to="/mon-compte" class="btn btn--icon" title="Mon Compte">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <NuxtLink to="/panier" class="btn btn--icon" title="Panier">
+          <Icon name="lucide:shopping-basket" size="20" />
+          <span class="cart-badge">0</span>
         </NuxtLink>
-        <button class="header__burger" @click="isMobileMenuOpen = !isMobileMenuOpen" aria-label="Menu">
-          <span></span>
-          <span></span>
-          <span></span>
+        <NuxtLink to="/mon-compte" class="btn btn--icon" title="Mon Compte">
+          <Icon name="lucide:user" size="20" />
+        </NuxtLink>
+        <button class="btn btn--icon header__burger" @click="isMobileMenuOpen = !isMobileMenuOpen" aria-label="Menu">
+          <Icon :name="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'" size="24" />
         </button>
       </div>
     </div>
@@ -54,137 +57,148 @@ onMounted(() => {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
   z-index: 1000;
-  padding: 1.5rem 0;
-  transition: $standard-transition;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   background: transparent;
 
   &.is-scrolled {
-    padding: 1rem 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    height: 65px;
+    background: rgba(5, 5, 5, 0.8);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   }
 
   &__content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
 
   &__logo {
-    font-weight: 900;
-    font-size: 1.5rem;
-    letter-spacing: -1px;
-    color: $secondary-color;
-    
-    .logo-text {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: white;
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      background: $primary-color;
+      color: white;
       display: flex;
       align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      box-shadow: 0 0 20px rgba(230, 0, 18, 0.4);
+      transition: transform 0.3s ease;
+    }
+
+    &:hover .logo-badge {
+      transform: rotate(-5deg) scale(1.1);
+    }
+
+    .logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      .text-primary { color: $primary-color; }
     }
   }
 
-  &__menu {
+  &__nav {
     display: flex;
-    list-style: none;
-    gap: 2rem;
+    align-items: center;
+    gap: 2.5rem;
 
     @media (max-width: $tablet) {
       display: none;
     }
   }
 
+  &__menu {
+    display: flex;
+    list-style: none;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+  }
+
   &__link {
-    font-weight: 600;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    transition: all 0.3s ease;
     position: relative;
+    padding: 0.5rem 0;
 
     &::after {
       content: '';
       position: absolute;
-      bottom: -5px;
+      bottom: 0;
       left: 0;
       width: 0;
       height: 2px;
       background: $primary-color;
-      transition: $standard-transition;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 10px $primary-color;
     }
 
-    &:hover::after,
-    &.router-link-active::after {
-      width: 100%;
+    &:hover, &.router-link-active {
+      opacity: 1;
+      &::after { width: 100%; }
     }
   }
 
   &__actions {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   &__burger {
     display: none;
-    flex-direction: column;
-    gap: 6px;
-    background: none;
-    border: none;
-    cursor: pointer;
-
-    span {
-      display: block;
-      width: 25px;
-      height: 2px;
-      background: $secondary-color;
-      transition: $standard-transition;
-    }
 
     @media (max-width: $tablet) {
       display: flex;
     }
   }
-
-  // Mobile Menu
-  &__nav.is-open {
-    @media (max-width: $tablet) {
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background: white;
-      padding: 5rem 2rem;
-
-      .header__menu {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2rem;
-        
-        .header__link {
-          font-size: 1.5rem;
-        }
-      }
-    }
-  }
 }
 
 .btn--icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: $light-gray;
-  color: $secondary-color;
-
-  &:hover {
+  position: relative;
+  
+  .cart-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
     background: $primary-color;
     color: white;
+    font-size: 10px;
+    font-weight: 900;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid $background-color;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
   }
 }
 </style>
