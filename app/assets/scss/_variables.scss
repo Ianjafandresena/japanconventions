@@ -1,15 +1,21 @@
-// Core colors based on the screenshots (Red, Dark, Light)
-$primary-color: #e60012; // Typical Japan-themed red
-$secondary-color: #2b2b2b;
-$text-color: #333333;
-$background-color: #ffffff;
-$light-gray: #f4f4f4;
+// Core colors - Cyber Dark Theme
+$primary-color: #e60012; // Japan Red
+$secondary-color: #0c0c0c; // Black
+$text-color: #eeeeee;
+$text-muted: #888888;
+$background-color: #050505;
+$bg-dark: #0c0c0c;
+$light-gray: #1a1a1a;
 
 // Accent colors
-$cyan-color: #00a8e1;
-$success-color: #2ecc71;
-$warning-color: #f39c12;
-$error-color: #e74c3c;
+$cyan-color: #00f2ff;
+$success-color: #00ff88;
+$warning-color: #ffaa00;
+$error-color: #ff0055;
+$japan-gold: #ffd700;
+
+// Advanced Design
+$noise-svg: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 
 // Transitions
 $standard-transition: all 0.3s ease;
@@ -39,16 +45,23 @@ $radius-xl: 16px;
 $radius-full: 50px;
 
 // Shadows
-$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 15px rgba(0, 0, 0, 0.08);
-$shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
-$shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+$shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.08);
+$shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.12);
+
+// Glassmorphism
+$glass-bg: rgba(20, 20, 20, 0.75);
+$glass-border: rgba(255, 255, 255, 0.08);
+$glass-blur: blur(20px);
+$glass-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6);
 
 // Typography
 $font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 $font-size-xs: 0.75rem;
 $font-size-sm: 0.875rem;
 $font-size-base: 1rem;
+$line-height-base: 1.6;
 $font-size-lg: 1.125rem;
 $font-size-xl: 1.25rem;
 $font-size-2xl: 1.5rem;
