@@ -19,7 +19,7 @@
         <div v-else-if="error" class="error-state">
           <Icon name="lucide:wifi-off" size="48" />
           <p>La connexion au Hub a échoué.</p>
-          <button @click="refresh" class="btn btn--primary">REDÉMARRER</button>
+          <button @click="() => refresh()" class="btn btn--primary">REDÉMARRER</button>
         </div>
 
         <div v-else class="bento-grid">
@@ -61,6 +61,32 @@
               </div>
             </div>
           </article>
+
+          <article 
+            class="bento-item bento-item--news"
+            :class="`bento-item--${(festivals?.length || 0) % 3}`"
+            v-motion
+            :initial="{ opacity: 0, scale: 0.95, y: 30 }"
+            :visible="{ opacity: 1, scale: 1, y: 0, transition: { delay: (festivals?.length || 0) * 100, duration: 800 } }"
+            style="--accent: #00f2ff"
+          >
+            <div class="bento-item__background">
+              <div class="news-pattern"></div>
+            </div>
+            <div class="bento-item__overlay"></div>
+            <div class="bento-item__content">
+              <div class="bento-item__tag">
+                <Icon name="lucide:newspaper" size="14" />
+                NOUVEAUTÉS
+              </div>
+              <h3 class="bento-item__title">ACTUALITÉS <br/>& NEWS</h3>
+              <div class="bento-item__actions">
+                <NuxtLink to="/actualites" class="bento-btn">
+                  LIRE LA SUITE <Icon name="lucide:arrow-right" />
+                </NuxtLink>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -84,6 +110,7 @@
 
 <script setup lang="ts">
 import { useFestivalsSSR } from '~/modules/festivals';
+import { computed } from 'vue';
 
 // SEO Optimization
 useSeoMeta({
@@ -104,7 +131,7 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify({
+      innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Japan Conventions",
@@ -148,6 +175,8 @@ const getInitials = (name: string): string => {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .section-header {
   margin-bottom: 5rem;
   text-align: center;
@@ -209,6 +238,27 @@ const getInitials = (name: string): string => {
   &--0 { grid-column: span 8; grid-row: span 2; }
   &--1 { grid-column: span 4; grid-row: span 1; }
   &--2 { grid-column: span 4; grid-row: span 1; }
+
+  &--news {
+    background: radial-gradient(circle at 100% 0%, rgba(0, 242, 255, 0.15) 0%, transparent 50%),
+                rgba(255, 255, 255, 0.02);
+    
+    .news-pattern {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(0, 242, 255, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      opacity: 0.3;
+      transition: all 0.8s ease;
+    }
+
+    &:hover {
+      .news-pattern {
+        transform: scale(1.1);
+        opacity: 0.5;
+      }
+    }
+  }
 
   @media (max-width: $tablet) {
     grid-column: span 12 !important;
@@ -331,7 +381,7 @@ const getInitials = (name: string): string => {
     border: none;
 
     &:hover {
-      background: darken($primary-color, 5%);
+      background: color.adjust($primary-color, $lightness: -5%);
       transform: translateY(-2px);
       box-shadow: 0 8px 16px rgba(230, 0, 18, 0.2);
     }
@@ -389,6 +439,7 @@ const getInitials = (name: string): string => {
     top: -50px;
     animation: fall linear forwards;
     user-select: none;
+    color: white;
   }
 }
 

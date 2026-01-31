@@ -17,22 +17,29 @@
       </nav>
 
       <div class="header__actions">
-        <NuxtLink to="/panier" class="btn btn--icon" title="Panier">
-          <Icon name="lucide:shopping-basket" size="20" />
-          <span class="cart-badge">0</span>
-        </NuxtLink>
+        <div class="cart-wrapper">
+          <button class="btn btn--icon" @click="toggleDrawer" title="Panier">
+            <Icon name="lucide:shopping-basket" size="20" class="text-white" />
+          </button>
+          <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
+        </div>
         <NuxtLink to="/mon-compte" class="btn btn--icon" title="Mon Compte">
-          <Icon name="lucide:user" size="20" />
+          <Icon name="lucide:user" size="20" class="text-white" />
         </NuxtLink>
         <button class="btn btn--icon header__burger" @click="isMobileMenuOpen = !isMobileMenuOpen" aria-label="Menu">
           <Icon :name="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'" size="24" />
         </button>
       </div>
     </div>
+    <CartDrawer />
   </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { useCart } from '~/modules/cart';
+import { ref, onMounted } from 'vue';
+
+const { cartCount, toggleDrawer } = useCart();
 const isScrolled = ref(false)
 const isMobileMenuOpen = ref(false)
 
@@ -41,6 +48,7 @@ const menuItems = [
   { label: 'JAPAN OTAKU FESTIVAL', path: '/japan-otaku-festival' },
   { label: 'JAPAN MANGA WAVE', path: '/japan-manga-wave' },
   { label: 'GAMER CONNECTION', path: '/gamer-connection' },
+  { label: 'ACTUALITÉS', path: '/actualites' },
   { label: 'LA PRESSE EN PARLE', path: '/presse' },
   { label: 'MON COMPTE', path: '/mon-compte' }
 ]
@@ -180,13 +188,15 @@ onMounted(() => {
   }
 }
 
-.btn--icon {
+.cart-wrapper {
   position: relative;
-  
+  display: flex;
+  align-items: center;
+
   .cart-badge {
     position: absolute;
-    top: -6px;
-    right: -6px;
+    top: -8px;
+    right: -8px;
     background: $primary-color;
     color: white;
     font-size: 10px;
@@ -197,8 +207,31 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid $background-color;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    border: 2px solid #050505;
+    box-shadow: 0 0 15px rgba($primary-color, 0.4);
+    pointer-events: none;
+    z-index: 10;
+  }
+}
+
+
+.btn--icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
   }
 }
 </style>

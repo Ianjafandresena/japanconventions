@@ -3,7 +3,7 @@
     <!-- Header avec titre et statistiques -->
     <div v-if="showHeader" class="event-grid__header">
       <div class="event-grid__title-section">
-        <span class="event-grid__icon">📅</span>
+        <Icon name="lucide:calendar" size="28" class="text-white opacity-80" />
         <h2 class="event-grid__title">{{ title }}</h2>
       </div>
       
@@ -26,15 +26,15 @@
     </div>
 
     <!-- Message d'erreur -->
-    <div v-else-if="error" class="event-grid__error">
-      <span class="error-icon">⚠️</span>
+    <div v-else-if="error" class="event-grid__error glass">
+      <Icon name="lucide:alert-triangle" size="48" class="text-primary mb-4" />
       <p>{{ error }}</p>
-      <button @click="$emit('retry')" class="retry-btn">Réessayer</button>
+      <button @click="$emit('retry')" class="btn btn--primary btn--sm mt-4">Réessayer</button>
     </div>
 
     <!-- Liste vide -->
-    <div v-else-if="events.length === 0" class="event-grid__empty">
-      <span class="empty-icon">📭</span>
+    <div v-else-if="events.length === 0" class="event-grid__empty glass">
+      <Icon name="lucide:inbox" size="48" class="opacity-20 mb-4" />
       <p>Aucun événement à afficher pour le moment.</p>
     </div>
 
@@ -58,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { EventDisplay, EventStats } from '../types/Event';
 import EventCard from './EventCard.vue';
 
@@ -157,9 +158,11 @@ const displayEvents = computed(() => {
   &__error,
   &__empty {
     text-align: center;
-    padding: 4rem 2rem;
-    background: #f8f9fa;
-    border-radius: 12px;
+    padding: 5rem 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
   }
 
   &__loading {
@@ -229,10 +232,11 @@ const displayEvents = computed(() => {
 // Stat component
 .stat {
   text-align: center;
-  padding: 0.75rem 1.25rem;
-  background: #f8f9fa;
-  border-radius: 10px;
-  min-width: 80px;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  min-width: 100px;
 
   &--highlight {
     background: linear-gradient(135deg, $primary-color, #c9000f);

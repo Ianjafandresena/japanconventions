@@ -24,11 +24,11 @@
       
       <div class="event-card__details">
         <p class="event-card__venue">
-          <span class="icon">📍</span>
+          <Icon name="lucide:map-pin" size="14" class="text-white opacity-50" />
           {{ event.eventDetails?.venue || 'Lieu à confirmer' }}
         </p>
         <p class="event-card__date">
-          <span class="icon">📅</span>
+          <Icon name="lucide:calendar" size="14" class="text-white opacity-50" />
           {{ event.formattedDate || 'Date à confirmer' }}
         </p>
       </div>
@@ -73,11 +73,13 @@ const getInitials = (title: string): string => {
 
 <style lang="scss" scoped>
 .event-card {
-  background: white;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
 
@@ -143,17 +145,17 @@ const getInitials = (title: string): string => {
 
   // Info section
   &__info {
-    padding: 1.25rem 1.5rem;
+    padding: 2rem;
     flex-grow: 1;
   }
 
   &__city {
     font-size: 1.25rem;
-    font-weight: 800;
-    color: $secondary-color;
+    font-weight: 900;
+    color: white;
     margin-bottom: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
   }
 
   &__details {
@@ -166,13 +168,14 @@ const getInitials = (title: string): string => {
   &__date {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    color: #666;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
+    font-weight: 600;
 
-    .icon {
-      font-size: 1rem;
+    .text-primary {
+      color: $primary-color;
     }
   }
 

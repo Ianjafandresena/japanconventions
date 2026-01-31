@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { Festival } from '../types/Festival';
 
 interface Props {
@@ -51,24 +52,21 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Couleur dynamique basée sur le type de festival
+// Couleur dynamique basée sur le slug de festival
 const festivalColor = computed(() => {
-  const colors: Record<string, string> = {
-    'japan-otaku-festival': '#e60012',
-    'japan-manga-wave': '#00a8e1',
-    'gamer-connection': '#00c853'
-  };
-  return colors[props.festival.type] || '#e60012';
+  return props.festival.color || '#e60012';
 });
 </script>
 
 <style lang="scss" scoped>
 .festival-card {
-  background: white;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 32px;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
 
@@ -79,18 +77,30 @@ const festivalColor = computed(() => {
 
   // Logo section
   &__logo {
-    padding: 2.5rem 2rem;
-    background: #fdfdfd;
+    padding: 3rem;
+    background: rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 260px;
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(230, 0, 18, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
 
     img {
       max-width: 100%;
-      max-height: 200px;
+      max-height: 180px;
       object-fit: contain;
-      transition: transform 0.3s ease;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+      z-index: 1;
     }
   }
 
