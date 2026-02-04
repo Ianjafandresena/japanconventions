@@ -1,27 +1,50 @@
-/**
- * useFestivals - Composables pour les festivals
- */
+import { createCPTService } from '../services/CPTService';
+import type { Festival, FestivalEvent } from '../services/CPTService';
+import type { PressArticle } from '../types/Festival';
 
-import { createFestivalService } from '../services/FestivalService';
-import type { Festival, PressArticle } from '../types/Festival';
+// Ré-export des types pour compatibilité
+export type { Festival, FestivalEvent };
 
 /**
- * Composable SSR pour récupérer tous les festivals
+ * Composable SSR pour récupérer tous les festivals depuis les CPTs
  */
 export const useFestivalsSSR = () => {
-    return useAsyncData('all-festivals', async () => {
-        const service = createFestivalService();
+    return useAsyncData('all-festivals-v3', async () => {
+        const service = createCPTService();
         return await service.getAllFestivals();
+    }, {
+        // Hydratation ultra-rapide 🏎️
+        getCachedData: (key) => useNuxtApp().payload.data[key] || useNuxtApp().static.data[key]
     });
 };
 
 /**
- * Composable SSR pour récupérer un festival spécifique par slug
+ * Composable SSR pour récupérer un festival spécifique par slug depuis les CPTs
+ * Optimisé pour puiser dans le cache du Hub si disponible 🚀
  */
 export const useFestivalSSR = (slug: string) => {
-    return useAsyncData(`festival-${slug}`, async () => {
-        const service = createFestivalService();
-        return await service.getFestival(slug);
+    return useAsyncData(`festival-${slug}-v3`, async () => {
+        const service = createCPTService();
+        return await service.getFestivalBySlug(slug);
+    }, {
+        getCachedData: (key) => {
+            const app = useNuxtApp();
+            // 1. Chercher dans son propre cache Nuxt
+            const ownData = app.payload.data[key] || app.static.data[key];
+            if (ownData) return ownData;
+
+            // 2. LOGIQUE HUB : Chercher dans les données globales du Hub (Formula 1 🚀)
+            // Si la home a déjà chargé tous les festivals, on pioche dedans au lieu de faire un fetch
+            const hubData = app.payload.data['all-festivals-v3'] as Festival[] | undefined;
+            if (hubData) {
+                const found = hubData.find(f => f.slug === slug);
+                if (found) {
+                    console.log(`[Cache Hit] Festival trouvé dans le payload global: ${slug}`);
+                    return found;
+                }
+            }
+            return null;
+        }
     });
 };
 
@@ -29,9 +52,11 @@ export const useFestivalSSR = (slug: string) => {
  * Composable SSR pour récupérer les articles de presse
  */
 export const usePressArticlesSSR = (first: number = 10) => {
-    return useAsyncData('press-articles', async () => {
-        const service = createFestivalService();
+    return useAsyncData('press-articles-v3', async () => {
+        const service = createCPTService();
         return await service.getPressArticles(first);
+    }, {
+        getCachedData: (key) => useNuxtApp().payload.data[key] || useNuxtApp().static.data[key]
     });
 };
 
@@ -39,8 +64,6 @@ export const usePressArticlesSSR = (first: number = 10) => {
  * Composable réactif pour les festivals (côté client)
  */
 export const useFestivals = () => {
-    const service = createFestivalService();
-
     const festivals = ref<Festival[]>([]);
     const pressArticles = ref<PressArticle[]>([]);
     const loading = ref(false);
@@ -50,7 +73,8 @@ export const useFestivals = () => {
         loading.value = true;
         error.value = null;
         try {
-            festivals.value = await service.getAllFestivals();
+            const cptService = createCPTService();
+            festivals.value = await cptService.getAllFestivals();
         } catch (e) {
             error.value = e instanceof Error ? e : new Error('Erreur de chargement');
         } finally {
@@ -60,7 +84,8 @@ export const useFestivals = () => {
 
     const fetchPressArticles = async (first?: number) => {
         try {
-            pressArticles.value = await service.getPressArticles(first);
+            const cptService = createCPTService();
+            pressArticles.value = await cptService.getPressArticles(first);
         } catch (e) {
             console.error('Error fetching press articles:', e);
         }
@@ -72,7 +97,6 @@ export const useFestivals = () => {
         loading,
         error,
         fetchFestivals,
-        fetchPressArticles,
-        config: service.getFestivalsConfig()
+        fetchPressArticles
     };
 };
