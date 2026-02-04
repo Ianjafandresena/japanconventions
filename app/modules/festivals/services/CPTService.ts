@@ -272,6 +272,73 @@ export function getLogoUrl(logoId: string): string {
 }
 
 // ============================================================================
+// VISITOR URL MAPPING - URLs des pages visiteur par festival et ville
+// Basé sur l'analyse du site officiel japanconventions.com
+// ============================================================================
+
+const VISITOR_URL_MAPPING: Record<string, Record<string, string>> = {
+    'japan-otaku-festival': {
+        'albi': 'https://japanconventions.com/japan-otaku-festival/visiteur-albi/',
+        'troyes': 'https://japanconventions.com/japan-otaku-festival/troyes-le-cube/visiteur-troyes/',
+        'chambery': 'https://japanconventions.com/japan-otaku-festival/chambery-savoi-expo/visiteur-chambery/',
+        'la-roche-sur-yon': 'https://japanconventions.com/japan-otaku-festival/la-roche-sur-yon/visiteur-la-roche-sur-yon/',
+        'marseille': 'https://japanconventions.com/japan-otaku-festival/palais-des-sports-marseille/visiteur-marseille/',
+        'chalons-en-champagne': 'https://japanconventions.com/japan-otaku-festival/la-capitole-chalon-en-champagne/visiteur-chalon-en-champagne/',
+        'chalon-en-champagne': 'https://japanconventions.com/japan-otaku-festival/la-capitole-chalon-en-champagne/visiteur-chalon-en-champagne/',
+        'saint-etienne': 'https://japanconventions.com/japan-otaku-festival/', // Page visiteur à créer
+    },
+    'japan-manga-wave': {
+        // À compléter quand les pages visiteur seront créées
+    },
+    'gamer-connection': {
+        'aubagne': 'https://japanconventions.com/gamer-connection/aubagne-centre-des-congres-agora-gamer-connection/',
+        'castres': 'https://japanconventions.com/gamer-connection/castres-castres-parc-expo-gamer-connection/',
+    },
+    'ink-secret': {
+        'aubagne': 'https://japanconventions.com/ink-secret/',
+        'castres': 'https://japanconventions.com/ink-secret/',
+    },
+    'one-night-event': {
+        // À compléter
+    },
+    'evenement-a-venir': {
+        // Événements futurs
+    }
+};
+
+/**
+ * Récupère l'URL visiteur pour un événement en fonction du festival et de la ville
+ * @param festivalSlug - Slug du festival (ex: 'japan-otaku-festival')
+ * @param villeSlug - Slug de la ville (ex: 'albi', 'troyes')
+ * @returns URL de la page visiteur ou undefined si non trouvée
+ */
+export function getVisitorUrl(festivalSlug: string, villeSlug: string): string | undefined {
+    // Normaliser les slugs (lowercase, sans accents)
+    const normalizedFestival = festivalSlug?.toLowerCase() || '';
+    const normalizedVille = villeSlug?.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Enlever accents
+        .replace(/\s+/g, '-') || '';
+
+    // Chercher dans le mapping
+    const festivalMapping = VISITOR_URL_MAPPING[normalizedFestival];
+    if (festivalMapping) {
+        // Essayer correspondance exacte d'abord
+        if (festivalMapping[normalizedVille]) {
+            return festivalMapping[normalizedVille];
+        }
+        // Essayer correspondance partielle (ex: "chalon" dans "chalons-en-champagne")
+        for (const [key, url] of Object.entries(festivalMapping)) {
+            if (key.includes(normalizedVille) || normalizedVille.includes(key)) {
+                return url;
+            }
+        }
+    }
+
+    // Fallback: construire une URL par défaut
+    return undefined;
+}
+
+// ============================================================================
 // TRANSFORMERS
 // ============================================================================
 
@@ -364,41 +431,20 @@ async function getAllFestivalsWithEvents(client: GraphQLClient): Promise<Festiva
                     .map(e => {
                         const eventData = transformEvenementToFestivalEvent(e);
 
-                        // LOGIQUE DE MAPPING DES PAGES (Entrée Visiteur / Exposant)
-                        // On cherche dans la hiérarchie des pages WordPress
-                        const citySlug = e.villes?.nodes?.[0]?.slug;
+                        // LOGIQUE DE MAPPING DES URLs VISITEUR
+                        // Utilise le mapping statique basé sur l'analyse du site officiel
+                        const citySlug = e.villes?.nodes?.[0]?.slug || '';
 
-                        // 1. Chercher la page de la ville soit au root du festival, soit ailleurs
-                        let cityPage = cityPages.find((p: any) =>
-                            (p.slug && citySlug && p.slug.includes(citySlug)) ||
-                            (e.title && p.title && e.title.includes(p.title))
-                        );
-
-                        if (!cityPage) {
-                            // Parfois la ville est directement sous le festival root
-                            cityPage = pages.find((p: any) => p.uri && p.uri.includes(`/${festivalSlug}/${citySlug}/`));
-                        }
-
-                        // 2. Extraire les URLs Visiteur / Exposant
-                        const subPages = cityPage?.children?.nodes || [];
-
-                        // Fallback : si Albi a ses pages Visiteur au root du festival (cas spécial JoF)
-                        const searchContext = subPages.length > 0 ? subPages : cityPages;
-
-                        const visitorPage = searchContext.find((p: any) =>
-                            p.slug?.toLowerCase().includes('visiteur') &&
-                            (citySlug ? p.slug?.includes(citySlug) : true) || cityPage?.slug === p.slug
-                        );
-
-                        const exhibitorPage = searchContext.find((p: any) =>
-                            p.slug?.toLowerCase().includes('exposant') &&
-                            (citySlug ? p.slug?.includes(citySlug) : true) || cityPage?.slug === p.slug
-                        );
+                        // Priorité 1: URL du CPT (si remplie dans WordPress)
+                        // Priorité 2: Mapping statique basé sur festival+ville
+                        // Priorité 3: URL par défaut
+                        const mappedVisitorUrl = getVisitorUrl(festivalSlug, citySlug);
 
                         return {
                             ...eventData,
-                            urlBilletterie: visitorPage?.uri ? `https://japanconventions.com${visitorPage.uri}` : eventData.urlBilletterie,
-                            urlExposant: exhibitorPage?.uri ? `https://japanconventions.com${exhibitorPage.uri}` : eventData.urlExposant
+                            urlBilletterie: eventData.urlBilletterie || mappedVisitorUrl || `https://japanconventions.com/${festivalSlug}/`,
+                            // urlExposant sera géré dans une prochaine étape
+                            urlExposant: eventData.urlExposant
                         };
                     });
 
