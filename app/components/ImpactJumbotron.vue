@@ -2,7 +2,6 @@
   <section class="impact-jumbotron">
     <div class="jumbotron-bg">
       <div class="mesh-gradient"></div>
-      <div class="noise-overlay"></div>
     </div>
     
     <div class="container jumbotron-container">

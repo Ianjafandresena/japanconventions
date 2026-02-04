@@ -1,5 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  // Accélération Formule 1 🚀 (Mise en cache intelligente)
+  routeRules: {
+    '/': { swr: 1 },          // Désactivé temporairement pour le debug
+    '/[slug]': { swr: 3600 },    // Cache 1h pour les pages festivals
+    '/presse': { swr: 3600 }     // Cache 1h pour la presse
+  },
+
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 

@@ -49,19 +49,19 @@ body {
     color: white;
 }
 
-// Global Noise Overlay (Refined)
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: $noise-svg;
-    opacity: 0.04;
-    pointer-events: none;
-    z-index: 9999;
-}
+// Global Noise Overlay - DÉSACTIVÉ pour un rendu HD
+// body::before {
+//     content: "";
+//     position: fixed;
+//     top: 0;
+//     left: 0;
+//     width: 100%;
+//     height: 100%;
+//     background-image: $noise-svg;
+//     opacity: 0.04;
+//     pointer-events: none;
+//     z-index: 9999;
+// }
 
 // Page Transitions
 .page-enter-active,

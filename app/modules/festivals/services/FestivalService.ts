@@ -102,6 +102,25 @@ const CROSS_FESTIVAL_PATTERNS: Record<string, string[]> = {
 };
 
 /**
+ * Villes/pages orphelines à exclure par festival
+ * (villes mal classées dans WordPress ou pages inactives)
+ */
+const EXCLUDED_CITIES_BY_FESTIVAL: Record<string, string[]> = {
+    'japan-otaku-festival': [
+        'aubagne',      // Gamer Connection, pas JOF
+        'castre',       // Gamer Connection, pas JOF (slug = castre, titre = Castres)
+        'castres',      // Gamer Connection, pas JOF
+        'nice',         // Page orpheline/inactive
+        'metz',         // Page orpheline/inactive
+        'lisieux'       // Page orpheline/inactive
+    ],
+    'japan-manga-wave': [],
+    'gamer-connection': [],
+    'ink-secret': [],
+    'evenement-a-venir': []
+};
+
+/**
  * Vérifie si une page est une ville (pas une page administrative ou cross-festival)
  */
 function isEventCity(title: string, slug: string, festivalSlug: string): boolean {
@@ -119,6 +138,14 @@ function isEventCity(title: string, slug: string, festivalSlug: string): boolean
     const crossPatterns = CROSS_FESTIVAL_PATTERNS[festivalSlug] || [];
     for (const pattern of crossPatterns) {
         if (lowerTitle.includes(pattern) || lowerSlug.includes(pattern)) {
+            return false;
+        }
+    }
+
+    // Vérifier les villes/pages orphelines exclues spécifiquement pour ce festival
+    const excludedCities = EXCLUDED_CITIES_BY_FESTIVAL[festivalSlug] || [];
+    for (const city of excludedCities) {
+        if (lowerSlug.includes(city) || lowerTitle.includes(city)) {
             return false;
         }
     }
@@ -323,7 +350,7 @@ export function createFestivalService() {
     return {
         getFestival: (slug: string) => getFestival(client, slug),
         getAllFestivals: () => getAllFestivals(client),
-        getFestivalEvents: (path: string) => getFestivalEvents(client, path),
+        getFestivalEvents: (path: string, festivalSlug?: string) => getFestivalEvents(client, path, festivalSlug || ''),
         getPressArticles: (first?: number) => getPressArticles(client, first),
         getFestivalsConfig: () => FESTIVALS_CONFIG
     };

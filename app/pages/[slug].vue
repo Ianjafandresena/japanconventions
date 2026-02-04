@@ -88,11 +88,19 @@
               <h3 class="event-name">{{ event.city }}</h3>
               
               <div class="event-actions">
-                <NuxtLink :to="`${event.uri}exposant/`" class="btn btn--ghost btn--sm">
-                  EXPOSANT
+                <NuxtLink 
+                  :to="event.urlExposant || `${event.uri}exposant/`" 
+                  class="btn btn--round btn--sm"
+                  target="_blank"
+                >
+                  Entrée exposant
                 </NuxtLink>
-                <NuxtLink :to="`${event.uri}visiteur/`" class="btn btn--neon btn--sm">
-                  BILLETERIE
+                <NuxtLink 
+                  :to="event.urlBilletterie || `${event.uri}visiteur/`" 
+                  class="btn btn--round btn--sm"
+                  target="_blank"
+                >
+                  Entrée visiteur
                 </NuxtLink>
               </div>
             </div>
@@ -152,318 +160,15 @@ const buttonAccentStyles = computed(() => {
     '--btn-accent-rgb': `${r}, ${g}, ${b}`
   };
 });
+
+// Scroll to events
+const scrollToEvents = () => {
+  const el = document.querySelector('.events-section');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+};
 </script>
 
 <style lang="scss" scoped>
-// Hero Section
-.hero-section {
-  padding: 10rem 0 6rem;
-  position: relative;
-  overflow: hidden;
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  background: $background-color;
-}
-
-.hero-mesh {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(var(--festival-color-rgb), 0.15) 0%, transparent 70%);
-  filter: blur(100px);
-  z-index: 0;
-}
-
-.hero-noise {
-    position: absolute;
-    inset: 0;
-    background-image: $noise-svg;
-    opacity: 0.05;
-    z-index: 1;
-    pointer-events: none;
-}
-
-.hero-container {
-  position: relative;
-  z-index: 10;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  margin-bottom: 3rem;
-
-  a {
-    color: white;
-    opacity: 0.5;
-    &:hover { opacity: 1; color: var(--festival-color); }
-  }
-
-  .separator { opacity: 0.3; }
-  .current { color: var(--festival-color); }
-}
-
-.festival-badge {
-  display: inline-block;
-  padding: 0.5rem 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  border-radius: 100px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  margin-bottom: 2rem;
-}
-
-.festival-title {
-  font-size: clamp(3rem, 10vw, 6rem);
-  line-height: 0.9;
-  margin-bottom: 3rem;
-  color: white;
-  text-transform: uppercase;
-
-  span {
-    color: transparent;
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
-  }
-}
-
-.festival-stats {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  
-  @media (max-width: $mobile) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-weight: 800;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.6);
-
-  i, .icon {
-    color: var(--festival-color);
-  }
-}
-
-.stat-separator {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.1);
-
-  @media (max-width: $mobile) {
-    display: none;
-  }
-}
-
-.hero-scroll {
-  position: absolute;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  
-  .mouse {
-    width: 25px;
-    height: 40px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    position: relative;
-
-    &::before {
-      content: '';
-      width: 4px;
-      height: 8px;
-      background: var(--festival-color);
-      border-radius: 2px;
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      animation: scroll-wheel 1.5s infinite;
-    }
-  }
-}
-
-// Events Section
-.events-section {
-  padding: 8rem 0;
-  background: $background-color;
-}
-
-.section-header {
-  margin-bottom: 5rem;
-  text-align: center;
-}
-
-.header-badge {
-  display: inline-block;
-  padding: 0.5rem 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--festival-color);
-  border-radius: 100px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  margin-bottom: 1.5rem;
-}
-
-.section-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  margin-bottom: 1.5rem;
-  color: white;
-  line-height: 1.1;
-
-  span {
-    color: transparent;
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
-  }
-}
-
-.section-desc {
-  opacity: 0.6;
-  font-size: 1.1rem;
-  color: white;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-// Events Grid
-.events-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 2rem;
-}
-
-// Event Card
-.event-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 32px;
-  overflow: hidden;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-
-  &:hover {
-    transform: translateY(-10px);
-    border-color: var(--festival-color);
-    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
-
-    .event-card__visual .visual-city {
-      transform: scale(1.1);
-    }
-  }
-
-  &__visual {
-    height: 200px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-
-    .visual-pattern {
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
-      background-size: 15px 15px;
-    }
-
-    .visual-city {
-      font-size: 2.5rem;
-      font-weight: 900;
-      color: white;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      z-index: 1;
-      transition: transform 0.5s ease;
-      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .visual-glow {
-      position: absolute;
-      bottom: -50px;
-      width: 100%;
-      height: 100px;
-      background: radial-gradient(ellipse at bottom, rgba(255, 255, 255, 0.2), transparent 70%);
-    }
-  }
-
-  &__body {
-    padding: 2.5rem;
-  }
-}
-
-.event-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.event-tag {
-  font-size: 0.65rem;
-  font-weight: 900;
-  padding: 0.3rem 0.8rem;
-  border: 1px solid var(--festival-color);
-  color: var(--festival-color);
-  border-radius: 6px;
-  letter-spacing: 1.5px;
-}
-
-.event-venue {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.event-name {
-  font-size: 1.75rem;
-  color: white;
-  margin-bottom: 2.5rem;
-}
-
-.event-actions {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 1rem;
-}
-
-
-
-// Industrial Line
-.industrial-line {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  padding: 4rem 0;
-  opacity: 0.1;
-
-  .line { flex: 1; height: 1px; background: white; }
-  .dot { width: 4px; height: 4px; background: white; border-radius: 50%; }
-}
-
-@keyframes scroll-wheel {
-  0% { opacity: 1; transform: translate(-50%, 0); }
-  100% { opacity: 0; transform: translate(-50%, 15px); }
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
+@use "@/assets/scss/pages/festival";
 </style>
 
