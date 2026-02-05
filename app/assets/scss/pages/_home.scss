@@ -71,16 +71,35 @@
     &--0 {
         grid-column: span 8;
         grid-row: span 2;
+
+        // Logos plus grands pour les grandes cartes (JOF, JMW)
+        .bento-img {
+            max-height: 260px;
+        }
     }
 
     &--1 {
         grid-column: span 4;
         grid-row: span 1;
+
+        // Logos adaptés aux petites cartes
+        .bento-img {
+            max-height: 140px;
+        }
     }
 
     &--2 {
         grid-column: span 4;
         grid-row: span 1;
+
+        // Logos adaptés aux petites cartes
+        .bento-img {
+            max-height: 140px;
+        }
+    }
+
+    &--last {
+        grid-row: span 2 !important;
     }
 
     @media (max-width: $tablet) {
@@ -89,12 +108,15 @@
     }
 
     &:hover {
-        transform: scale(0.98);
-        border-color: var(--accent);
+        transform: translateY(-5px);
+        border-color: var(--accent); // Bordure qui s'illumine
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
 
-        .bento-item__background img {
-            transform: scale(1.1);
-            filter: saturate(1.2);
+        // Le logo s'illumine aussi
+        .bento-img {
+            transform: translate(-50%, -50%) scale(1.05);
+            opacity: 1;
+            filter: drop-shadow(0 0 35px var(--accent));
         }
     }
 
@@ -103,17 +125,23 @@
         inset: 0;
         z-index: 0;
 
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.5;
-            transition: all 0.8s ease;
+        .bento-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); // Centrage parfait
+            width: auto;
+            height: auto;
+            max-width: 80%;
+            max-height: 200px; // TAILLE UNIFORME : Toujours la même dimension visuelle
+            object-fit: contain;
+            opacity: 0.95;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.3));
             image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
+            image-rendering: high-quality;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            transform: translateZ(0);
         }
     }
 

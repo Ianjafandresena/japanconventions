@@ -100,15 +100,6 @@
       </div>
     </section>
 
-    <!-- Visual Divider -->
-    <div class="industrial-line" aria-hidden="true">
-      <div class="line"></div>
-      <div class="dot"></div>
-      <div class="line"></div>
-    </div>
-
-    <!-- Impact Jumbotron -->
-    <ImpactJumbotron />
   </div>
 </template>
 
