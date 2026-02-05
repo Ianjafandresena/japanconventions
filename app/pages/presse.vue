@@ -83,9 +83,9 @@
               </p>
               
               <div class="article-footer">
-                <NuxtLink :to="article.url" class="read-more">
+                <a :href="getArticleUrl(article.url)" target="_blank" rel="noopener" class="read-more">
                   LIRE L'ARTICLE <Icon name="lucide:arrow-right" size="16" />
-                </NuxtLink>
+                </a>
               </div>
             </div>
           </article>
@@ -135,6 +135,17 @@ const truncateText = (text: string, maxLength: number): string => {
   const cleanText = text.replace(/<[^>]*>/g, '').trim();
   if (cleanText.length <= maxLength) return cleanText;
   return cleanText.substring(0, maxLength).trim() + '...';
+};
+
+// Construit l'URL complète vers le site WordPress officiel
+const getArticleUrl = (uri: string): string => {
+  const config = useRuntimeConfig();
+  const baseUrl = (config.public.siteUrl as string).replace('/graphql', '');
+  // Si l'URI commence par /, on l'ajoute directement
+  if (uri.startsWith('/')) {
+    return `${baseUrl}${uri}`;
+  }
+  return `${baseUrl}/${uri}`;
 };
 </script>
 
