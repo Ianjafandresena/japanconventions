@@ -8,12 +8,7 @@
           <span class="logo-text">JAPAN<span class="text-primary">CONVENTIONS</span></span>
         </NuxtLink>
         <p class="footer__tagline">Organisateur leader d'événements culturels japonais et geek en France. Saison 2025/2026.</p>
-        <div class="footer__socials">
-          <a href="#" class="social-link"><Icon name="lucide:facebook" /></a>
-          <a href="#" class="social-link"><Icon name="lucide:instagram" /></a>
-          <a href="#" class="social-link"><Icon name="lucide:twitter" /></a>
-          <a href="#" class="social-link"><Icon name="lucide:youtube" /></a>
-        </div>
+
       </div>
 
       <div class="footer__links">
