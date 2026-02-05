@@ -33,15 +33,7 @@
               {{ slide.description }}
             </p>
 
-            <div class="jumbotron-actions">
-            <button class="btn btn--neon btn--lg" style="width: 200px; margin-right: 20px; ">
-              <Icon name="lucide:user-plus" />
-              REJOINDRE LE CLUB
-            </button>
-            <button class="btn btn--ghost btn--lg" style="width: 200px; margin-left: 20px;">
-              NOS PARTENAIRES <Icon name="lucide:arrow-right" />
-            </button>
-          </div>
+
           </div>
         </div>
       </div>

@@ -2,9 +2,12 @@
 export default defineNuxtConfig({
   // Accélération Formule 1 🚀 (Mise en cache intelligente)
   routeRules: {
-    '/': { swr: 1 },          // Désactivé temporairement pour le debug
-    '/[slug]': { swr: 3600 },    // Cache 1h pour les pages festivals
-    '/presse': { swr: 3600 }     // Cache 1h pour la presse
+    '/': { swr: 1 },             // Accueil - revalidation rapide
+    '/japan-otaku-festival': { swr: 3600 },
+    '/japan-manga-wave': { swr: 3600 },
+    '/gamer-connection': { swr: 3600 },
+    '/ink-secret': { swr: 3600 },
+    '/presse': { swr: 3600 }
   },
 
   compatibilityDate: '2025-07-15',

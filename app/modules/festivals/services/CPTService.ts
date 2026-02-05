@@ -22,8 +22,8 @@ export interface CPTFestival {
         idLogo: string[];
         color: string;
         statut: string[];
-        // urlExposant?: string; // Désactivé: n'existe pas encore dans ACF
-        // urlBilletterie?: string; // Désactivé: n'existe pas encore dans ACF
+        // urlExposant?: string; // pas encore dans ACF
+        // urlBilletterie?: string; // pas encore dans ACF
     };
 }
 
@@ -37,7 +37,14 @@ export interface CPTEvenement {
         dateDeFin: string;
         statut: string[];
         urlBilletterie?: string;
-        // urlExposant?: string; // Désactivé: n'existe pas encore dans ACF
+        image?: {
+            node?: {
+                sourceUrl?: string;
+            };
+        };
+        facebook?: string;
+        instagram?: string;
+        // urlExposant?: string; 
         festival?: {
             nodes: Array<{
                 databaseId: number;
@@ -77,6 +84,9 @@ export interface FestivalEvent {
     statut?: string;
     urlBilletterie?: string;
     urlExposant?: string;
+    image?: string;
+    facebook?: string;
+    instagram?: string;
 }
 
 export interface Evenement {
@@ -179,6 +189,13 @@ const GET_HUB_DATA = `
                     dateDeDebut
                     dateDeFin
                     statut
+                    image {
+                        node {
+                            sourceUrl
+                        }
+                    }
+                    facebook
+                    instagram
                     festival {
                         nodes {
                             databaseId
@@ -259,8 +276,8 @@ const GET_EVENEMENTS_BY_FESTIVAL = `
 // ============================================================================
 
 const LOGO_MAPPING: Record<string, string> = {
-    'jof': 'https://japanconventions.com/wp-content/uploads/2025/08/Japan-Otaku-festival-Logo-1536x1536-1-3.png',
-    'jmw': 'https://japanconventions.com/wp-content/uploads/2025/08/LOGO-JMW-A-carree-1.png',
+    'jof': 'https://japanconventions.com/wp-content/uploads/2025/08/Japan-Otaku-festival-Logo-1536x1536-1.png',
+    'jmw': 'https://japanconventions.com/wp-content/uploads/2025/08/LOGO-JMW-A-carree.png',
     'gc': 'https://japanconventions.com/wp-content/uploads/2025/10/gamer-connection-logo.png',
     'ink': 'https://japanconventions.com/wp-content/uploads/2025/10/logotatouage.jpg',
     'one': 'https://japanconventions.com/wp-content/uploads/2025/10/logoFever.jpg'
@@ -354,8 +371,10 @@ function transformEvenementToFestivalEvent(cpt: CPTEvenement): FestivalEvent {
         dateFin: cpt.detailsEvenement?.dateDeFin,
         statut: cpt.detailsEvenement?.statut?.[0],
         urlBilletterie: cpt.detailsEvenement?.urlBilletterie,
-        // @ts-ignore - Temporairement désactivé jusqu'à création dans ACF
-        urlExposant: cpt.detailsEvenement?.urlExposant
+        // urlExposant: cpt.detailsEvenement?.urlExposant,
+        image: cpt.detailsEvenement?.image?.node?.sourceUrl,
+        facebook: cpt.detailsEvenement?.facebook,
+        instagram: cpt.detailsEvenement?.instagram
     };
 }
 
@@ -383,15 +402,25 @@ let festivalsCache: Festival[] | null = null;
 let pressCache: PressArticle[] | null = null;
 
 async function getAllFestivalsWithEvents(client: GraphQLClient): Promise<Festival[]> {
-    // Retour rapide si déjà en mémoire ⚡
-    if (festivalsCache) return festivalsCache;
+   
+    if (festivalsCache) {
+        console.log('[CPTService] Retour du cache mémoire');
+        return festivalsCache;
+    }
+
+    console.log('[CPTService] Fetch des données depuis WordPress...');
 
     try {
-        // Fetch Hub Data + Hierarchy in parallel
+       
         const [hubResponse, pagesResponse] = await Promise.all([
             client.query<{ festivals: { nodes: CPTFestival[] }, vNements: { nodes: CPTEvenement[] } }>(GET_HUB_DATA),
             client.query<{ pages: { nodes: any[] } }>(GET_PAGES_HIERARCHY)
         ]);
+
+        console.log('[CPTService] Réponse GraphQL reçue:', {
+            festivalsCount: hubResponse?.festivals?.nodes?.length || 0,
+            eventsCount: hubResponse?.vNements?.nodes?.length || 0
+        });
 
         if (!hubResponse || !hubResponse.festivals || !hubResponse.vNements) {
             console.error('[CPTService] Données manquantes dans la réponse GraphQL');
@@ -467,10 +496,26 @@ async function getAllFestivalsWithEvents(client: GraphQLClient): Promise<Festiva
                 };
             });
 
+        // Ordonner les festivals pour le Bento Grid
+        // Index 0 et 3 sont des cartes larges (span 8)
+        const orderMap: Record<string, number> = {
+            'japan-otaku-festival': 0,
+            'gamer-connection': 1,
+            'ink-secret': 2,
+            'japan-manga-wave': 3,
+            'evenement-a-venir': 4
+        };
+
+        const sortedResult = result.sort((a, b) => {
+            const orderA = orderMap[a.slug] ?? 99;
+            const orderB = orderMap[b.slug] ?? 99;
+            return orderA - orderB;
+        });
+
         // Mise en cache
-        console.log('[CPTService] Festivals chargés:', result.map(f => f.name));
-        festivalsCache = result;
-        return result;
+        console.log('[CPTService] Festivals chargés et ordonnés:', sortedResult.map(f => f.name));
+        festivalsCache = sortedResult;
+        return sortedResult;
     } catch (error) {
         console.error('[CPTService] Erreur lors de la récupération des festivals:', error);
         throw error;

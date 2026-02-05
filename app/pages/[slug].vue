@@ -71,10 +71,19 @@
             :initial="{ opacity: 0, y: 30, scale: 0.95 }"
             :visible="{ opacity: 1, y: 0, scale: 1, transition: { delay: index * 100, duration: 800 } }"
           >
-            <div class="event-card__visual" :style="{ background: festivalData?.color || '#e60012' }">
-              <div class="visual-pattern"></div>
-              <div class="visual-city">{{ event.city }}</div>
-              <div class="visual-glow"></div>
+            <!-- Image de l'événement ou placeholder -->
+            <div class="event-card__visual" :style="{ background: event.image ? 'transparent' : (festivalData?.color || '#e60012') }">
+              <img 
+                v-if="event.image" 
+                :src="event.image" 
+                :alt="event.city"
+                class="visual-img"
+              />
+              <template v-else>
+                <div class="visual-pattern"></div>
+                <div class="visual-city">{{ event.city }}</div>
+                <div class="visual-glow"></div>
+              </template>
             </div>
 
             <div class="event-card__body">
@@ -87,7 +96,14 @@
               </div>
               <h3 class="event-name">{{ event.city }}</h3>
               
-              <div class="event-actions">
+              <!-- Dates de l'événement -->
+              <div class="event-dates" v-if="event.dateDebut">
+                <Icon name="lucide:calendar" size="14" />
+                <span>Du {{ formatDate(event.dateDebut) }} au {{ formatDate(event.dateFin || event.dateDebut) }}</span>
+              </div>
+              
+              <!-- Boutons côte à côte -->
+              <div class="event-actions event-actions--row">
                 <NuxtLink 
                   :to="event.urlExposant || `${event.uri}exposant/`" 
                   class="btn btn--round btn--sm"
@@ -103,21 +119,36 @@
                   Entrée visiteur
                 </NuxtLink>
               </div>
+              
+              <!-- Icônes réseaux sociaux -->
+              <div class="event-socials" v-if="event.facebook || event.instagram">
+                <a 
+                  v-if="event.facebook" 
+                  :href="event.facebook" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="social-icon social-icon--facebook"
+                  aria-label="Page Facebook"
+                >
+                  <Icon name="lucide:facebook" size="18" />
+                </a>
+                <a 
+                  v-if="event.instagram" 
+                  :href="event.instagram" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="social-icon social-icon--instagram"
+                  aria-label="Page Instagram"
+                >
+                  <Icon name="lucide:instagram" size="18" />
+                </a>
+              </div>
             </div>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- Visual Divider -->
-    <div class="industrial-line" aria-hidden="true">
-      <div class="line"></div>
-      <div class="dot"></div>
-      <div class="line"></div>
-    </div>
-
-    <!-- Impact Jumbotron -->
-    <ImpactJumbotron />
   </div>
 </template>
 
@@ -146,6 +177,15 @@ useSeoMeta({
 // Helper initials
 const getInitials = (name: string): string => {
   return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 3);
+};
+
+// Format date for display (ex: "31 janvier")
+const formatDate = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 
+                  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  return `${date.getDate()} ${months[date.getMonth()]}`;
 };
 
 // Button accent styles

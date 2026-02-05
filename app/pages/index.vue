@@ -10,10 +10,6 @@
           <div class="header-badge">NOS UNIVERS</div>
           <h2 class="section-title">EXPLOREZ LE <br/><span>HUB OTAKU</span></h2>
           <p class="section-desc">Plongez dans les plus grands rassemblements otaku de France.</p>
-          <!-- Debug info -->
-          <p v-if="festivals" style="font-size: 0.8rem; opacity: 0.5; margin-top: 1rem;">
-            Festivals détectés: {{ festivals.map(f => f.name).join(', ') }} ({{ festivals.length }})
-          </p>
         </div>
 
         <div v-if="pending" class="bento-grid loading">
@@ -28,27 +24,30 @@
         </div>
 
         <div v-else class="bento-grid">
-          <article 
+          <NuxtLink
             v-for="(festival, index) in festivals" 
             :key="festival.id"
+            :to="festival.path"
             class="bento-item"
-            :class="`bento-item--${index % 3}`"
+            :class="[
+              `bento-item--${index % 3}`,
+              { 'bento-item--last': festivals && index === festivals.length - 1 && index % 3 === 1 }
+            ]"
             v-motion
             :initial="{ opacity: 0, scale: 0.95, y: 30 }"
             :visible="{ opacity: 1, scale: 1, y: 0, transition: { delay: index * 100, duration: 800 } }"
             :style="{ '--accent': festival.color }"
           >
             <div class="bento-item__background">
-              <NuxtImg 
+              <img 
                 v-if="festival.logo"
                 :src="festival.logo"
                 :alt="festival.name"
-                width="1200"
-                height="1200"
-                format="webp"
-                quality="100"
+                width="1536"
+                height="1536"
                 loading="eager"
-                densities="x1 x2"
+                fetchpriority="high"
+                class="bento-img"
               />
             </div>
             
@@ -62,25 +61,17 @@
               <h3 class="bento-item__title">{{ festival.name }}</h3>
               
               <div class="bento-item__actions">
-                <NuxtLink :to="festival.path" class="bento-btn">
+                <span class="bento-btn">
                   DÉCOUVRIR <Icon name="lucide:chevron-right" />
-                </NuxtLink>
+                </span>
               </div>
             </div>
-          </article>
+          </NuxtLink>
         </div>
       </div>
     </section>
 
     <!-- Visual Divider -->
-    <div class="industrial-line" aria-hidden="true">
-      <div class="line"></div>
-      <div class="dot"></div>
-      <div class="line"></div>
-    </div>
-
-    <!-- Impact Jumbotron -->
-    <ImpactJumbotron />
 
     <!-- Cherry Blossoms (Enhanced) -->
     <div class="cherry-blossoms">
